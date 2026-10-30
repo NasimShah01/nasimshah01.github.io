@@ -263,6 +263,16 @@ details ul{padding-left:20px}
 .st-empty{text-align:center;color:var(--dim);background:#fff;border:1px dashed #CFE3D8;border-radius:18px;padding:26px 16px}
 .st-upd{text-align:center;color:var(--dim);font-size:12.5px;margin-top:6px}
 @media(max-width:760px){.st-tiles{grid-template-columns:repeat(2,1fr)}.st-grid{grid-template-columns:minmax(0,1fr)}.st-tile b{font-size:26px}}
+/* live banner */
+.livebar{display:flex;align-items:center;justify-content:center;gap:10px;padding:8px 14px;font-weight:800;font-size:14.5px;color:#fff;background:linear-gradient(90deg,#B91C1C,#DC2626);text-align:center;line-height:1.3}
+.livebar[hidden]{display:none}
+.livebar .ldot{width:10px;height:10px;border-radius:50%;background:#fff;flex-shrink:0;animation:lpulse 1.2s infinite}
+.livebar .lgo{background:#fff;color:#B91C1C;border-radius:999px;padding:3px 10px;font-size:12.5px;white-space:nowrap;flex-shrink:0}
+.livebar.paused{background:linear-gradient(90deg,#92400E,#B45309)}.livebar.paused .ldot{animation:none}.livebar.paused .lgo{color:#92400E}
+.livebar.done{background:linear-gradient(90deg,#065F46,#047857)}.livebar.done .lgo{color:#065F46}
+.livebar .ltxt{min-width:0}
+@keyframes lpulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.8)}}
+@media(max-width:560px){.livebar{font-size:13px;justify-content:space-between;text-align:left}}
 footer{background:var(--g9);color:#A7F3D0;text-align:center;padding:30px 20px;font-size:14px}
 footer b{color:#fff}
 </style>
@@ -274,7 +284,7 @@ footer b{color:#fff}
     <a href="#live" data-en="Live">লাইভ</a><a href="#features" data-en="Features">ফিচার</a><a href="#download" data-en="Download">ডাউনলোড</a><a href="#club" data-en="Club">ক্লাব</a><a href="#players" data-en="Players">খেলোয়াড়</a><a href="#stats" data-en="Stats">পরিসংখ্যান</a><a href="#gallery" data-open-gallery data-en="Gallery">গ্যালারি</a><a href="#ground" data-en="Ground">মাঠ</a><a href="#contact" data-en="Contact">যোগাযোগ</a>
   </div>
   <button class="lang" id="langBtn">English</button>
-</div></nav>
+</div><a id="liveBar" class="livebar" href="#live" hidden></a></nav>
 
 <header class="hero" id="top"><div class="wrap">
   <div>
@@ -632,6 +642,58 @@ let TEAM_I = 0; const SQUAD_OF=()=>TEAMS[TEAM_I].players;
   }
   render(); load(); setInterval(()=>{ if(!document.hidden) load(); }, 120000);
   document.getElementById('langBtn').addEventListener('click',()=>setTimeout(render,0));
+})();
+</script>
+<script>
+(function(){
+  const BASE='https://tsc-cricket--live-default-rtdb.asia-southeast1.firebasedatabase.app/live/current';
+  const bar=document.getElementById('liveBar');
+  const L=()=>document.documentElement.lang==='en'?'en':'bn';
+  const num=n=>L()==='en'?String(n):String(n).replace(/\d/g,d=>'০১২৩৪৫৬৭৮৯'[d]);
+  const esc=x=>String(x==null?'':x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const T=(bn,en)=>L()==='en'?en:bn;
+  let D=null, timer=null;
+  const ov=(b,bpo)=>Math.floor(b/bpo)+(b%bpo?'.'+(b%bpo):'');
+  const sn=n=>{ n=String(n||''); const w=n.trim().split(/\s+/); return (n.length>14 && w.length>=2) ? w.map(x=>x[0]).join('').toUpperCase() : n; };
+  function show(){
+    if(!D || !D.match){ bar.hidden=true; return; }
+    const m=D.match, st=D.state||'live', age=Date.now()-(+D.updatedAt||0);
+    const done = m.status==='completed' || m.status==='abandoned';
+    const A=sn((m.teamA&&m.teamA.name)||''), B=sn((m.teamB&&m.teamB.name)||'');
+    if(st==='stopped' && !done){ bar.hidden=true; return; }
+    if(done){
+      if(age>3*3600e3){ bar.hidden=true; return; }
+      bar.className='livebar done';
+      bar.innerHTML=`<span class="ltxt">🏁 ${T('ম্যাচ শেষ','Match over')} · ${esc(A)} ${T('বনাম','vs')} ${esc(B)} · ${esc((m.result&&m.result.text)||'')}</span><span class="lgo">${T('স্কোরকার্ড','Scorecard')} →</span>`;
+      bar.hidden=false; return;
+    }
+    if(age>8*3600e3){ bar.hidden=true; return; }
+    const inn=(m.innings||[])[m.currentInnings||0];
+    let score='';
+    if(inn){
+      const bat=inn.battingTeam==='A'?A:B, bpo=m.ballsPerOver||6;
+      score=`${esc(bat)} ${num(inn.runs||0)}/${num(inn.wickets||0)} (${num(ov(inn.balls||0,bpo))}${m.overs?'/'+num(m.overs):''})`;
+      if(inn.target){ const need=inn.target-(inn.runs||0), left=(m.overs||0)*bpo-(inn.balls||0); if(need>0 && left>0) score+=` · ${T(`${num(left)} বলে ${num(need)} রান দরকার`,`need ${need} off ${left}`)}`; }
+    }
+    const paused = st==='paused';
+    bar.className='livebar'+(paused?' paused':'');
+    bar.innerHTML=`<span class="ldot"></span><span class="ltxt">${paused?'⏸ '+T('বিরতি','Paused'):'🔴 '+T('এখন লাইভ','Live now')} · ${esc(A)} ${T('বনাম','vs')} ${esc(B)}${score?'<br><b style="font-weight:700">'+score+'</b>':''}</span><span class="lgo">${T('দেখুন','Watch')} →</span>`;
+    bar.hidden=false;
+  }
+  async function poll(){
+    let next=60000;
+    try{
+      const st=await (await fetch(BASE+'/state.json',{cache:'no-store'})).json();
+      const up=await (await fetch(BASE+'/updatedAt.json',{cache:'no-store'})).json();
+      if(!st || !up || Date.now()-up>8*3600e3){ D=null; }
+      else { const m=await (await fetch(BASE+'/match.json',{cache:'no-store'})).json(); D={state:st,updatedAt:up,match:m}; if(st==='live' && m && m.status==='live') next=20000; }
+    }catch(e){ /* keep last known */ }
+    show(); clearTimeout(timer); timer=setTimeout(poll, document.hidden?Math.max(next,60000):next);
+  }
+  document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ clearTimeout(timer); poll(); } });
+  bar.addEventListener('click',e=>{ const sec=document.getElementById('live'); if(sec){ e.preventDefault(); sec.scrollIntoView({behavior:'smooth'}); } });
+  document.getElementById('langBtn').addEventListener('click',()=>setTimeout(show,0));
+  poll();
 })();
 </script>
 </body>
