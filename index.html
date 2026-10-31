@@ -17,6 +17,7 @@
 </style>
 <script>
 const SITE = {
+  fbpage   : "https://www.facebook.com/share/1BY8gZaY8C/",   // ক্লাবের অফিসিয়াল ফেসবুক পেজ
   facebook : "https://www.facebook.com/groups/radiotaltolala/",      // ফেসবুক পেজের লিংক, যেমন "https://facebook.com/tsccricket"
   whatsapp : "",      // WhatsApp গ্রুপ/চ্যানেলের লিংক, যেমন "https://chat.whatsapp.com/xxxx"
   youtube  : "",      // (ঐচ্ছিক) YouTube চ্যানেল
@@ -273,6 +274,16 @@ details ul{padding-left:20px}
 .livebar .ltxt{min-width:0}
 @keyframes lpulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.8)}}
 @media(max-width:560px){.livebar{font-size:13px;justify-content:space-between;text-align:left}}
+/* facebook page */
+.navfb{width:36px;height:36px;border-radius:50%;background:#1877F2;color:#fff;font:900 22px/36px Arial,sans-serif;text-align:center;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.navfb:hover{filter:brightness(1.1)}
+.foot-fb{display:inline-block;margin:8px 0;color:#FBBF24;font-weight:800}
+.brand{min-width:0;flex:0 1 auto;overflow:hidden}.brand span{white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:380px){.brand span{font-size:12.5px!important}.brand small{font-size:8px!important}.lang{padding:6px 10px!important;font-size:13px}}
+@media(max-width:430px){.brand span{font-size:14px;letter-spacing:.2px}.brand small{font-size:8.5px;letter-spacing:1px}.brand img{width:34px;height:34px}.navfb{width:32px;height:32px;font-size:19px;line-height:32px}}
+.jbtns{display:flex;flex-direction:column;gap:10px;flex-shrink:0}
+.jbtns .btn{margin-top:0;justify-content:center}
+@media(max-width:760px){.jbtns{width:100%}}
 footer{background:var(--g9);color:#A7F3D0;text-align:center;padding:30px 20px;font-size:14px}
 footer b{color:#fff}
 </style>
@@ -283,6 +294,7 @@ footer b{color:#fff}
   <div class="links">
     <a href="#live" data-en="Live">লাইভ</a><a href="#features" data-en="Features">ফিচার</a><a href="#download" data-en="Download">ডাউনলোড</a><a href="#club" data-en="Club">ক্লাব</a><a href="#players" data-en="Players">খেলোয়াড়</a><a href="#stats" data-en="Stats">পরিসংখ্যান</a><a href="#gallery" data-open-gallery data-en="Gallery">গ্যালারি</a><a href="#ground" data-en="Ground">মাঠ</a><a href="#contact" data-en="Contact">যোগাযোগ</a>
   </div>
+  <a class="navfb js-fbpage" target="_blank" rel="noopener" aria-label="Facebook page" title="Facebook">f</a>
   <button class="lang" id="langBtn">English</button>
 </div><a id="liveBar" class="livebar" href="#live" hidden></a></nav>
 
@@ -434,7 +446,7 @@ footer b{color:#fff}
       <h2 data-en="Join the club">ক্লাবে যোগ দিন</h2>
       <p data-en="Want to play with TSC or follow every match? Join our Facebook group — match news, live links, photos and practice updates are all posted there.">TSC-এর সাথে খেলতে চান বা প্রতিটা ম্যাচের খবর পেতে চান? আমাদের ফেসবুক গ্রুপে যোগ দিন — ম্যাচের খবর, লাইভ লিংক, ছবি আর অনুশীলনের আপডেট সব সেখানেই।</p>
     </div>
-    <a class="btn gold js-fb" target="_blank" rel="noopener" data-en="📘 Join the Facebook group">📘 ফেসবুক গ্রুপে যোগ দিন</a>
+    <div class="jbtns"><a class="btn gold js-fb" target="_blank" rel="noopener" data-en="👥 Join the Facebook group">👥 ফেসবুক গ্রুপে যোগ দিন</a><a class="btn green js-fbpage" target="_blank" rel="noopener" data-en="📘 Follow the Facebook page">📘 ফেসবুক পেজ ফলো করুন</a></div>
   </div>
 </div></section>
 
@@ -459,7 +471,7 @@ footer b{color:#fff}
     </ul></details>
 </div></section>
 
-<footer><b>TSC CRICKET SCORE</b> · ছালাভরা তালতলা স্পোর্টিং ক্লাব · Est. 2012<br><span data-en="Made with ❤️ for our club">আমাদের ক্লাবের জন্য ❤️ দিয়ে তৈরি</span> · © <span id="yr"></span></footer>
+<footer><b>TSC CRICKET SCORE</b> · ছালাভরা তালতলা স্পোর্টিং ক্লাব · Est. 2012<br><a class="js-fbpage foot-fb" target="_blank" rel="noopener" data-en="📘 Follow our Facebook page">📘 আমাদের ফেসবুক পেজ ফলো করুন</a><br><span data-en="Made with ❤️ for our club">আমাদের ক্লাবের জন্য ❤️ দিয়ে তৈরি</span> · © <span id="yr"></span></footer>
 
 <script>
 (function(){
@@ -470,6 +482,7 @@ footer b{color:#fff}
   document.querySelectorAll('.js-guide').forEach(a=>{ a.href=enc(SITE.guideFile); a.setAttribute('download',''); });
   const fr=document.getElementById('liveFrame'); if(fr) fr.src=SITE.watchUrl;
   document.querySelectorAll('.js-map').forEach(a=>a.href=SITE.mapLink);
+  document.querySelectorAll('.js-fbpage').forEach(a=>{ if(SITE.fbpage) a.href=SITE.fbpage; else a.remove(); });
   document.querySelectorAll('.js-fb').forEach(a=>{ if(SITE.facebook) a.href=SITE.facebook; else a.remove(); });
   const gm=document.getElementById('gmapFrame'); if(gm) gm.src=`https://maps.google.com/maps?q=${SITE.mapLat},${SITE.mapLng}&z=16&output=embed`;
   document.getElementById('yr').textContent=new Date().getFullYear();
@@ -477,7 +490,7 @@ footer b{color:#fff}
   const g=document.getElementById('gallery');
   if(SITE.gallery && SITE.gallery.length) g.innerHTML=SITE.gallery.map(f=>`<img src="${enc(f)}" alt="" loading="lazy">`).join(''); else g.remove();
   // social links (only the ones that are filled in)
-  const items=[['facebook','📘','Facebook Group','ফেসবুক গ্রুপ'],['whatsapp','💬','WhatsApp','WhatsApp'],['youtube','▶️','YouTube','YouTube']];
+  const items=[['fbpage','📘','Facebook Page','ফেসবুক পেজ'],['facebook','👥','Facebook Group','ফেসবুক গ্রুপ'],['whatsapp','💬','WhatsApp','WhatsApp'],['youtube','▶️','YouTube','YouTube']];
   const sc=document.getElementById('social'); let html='';
   items.forEach(([k,ic,en,bn])=>{ if(SITE[k]) html+=`<a class="btn green" target="_blank" rel="noopener" href="${SITE[k]}"><span>${ic}</span><span data-en="${en}">${bn}</span></a>`; });
   if(SITE.email) html+=`<a class="btn outline" href="mailto:${SITE.email}">✉️ ${SITE.email}</a>`;
